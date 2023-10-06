@@ -210,7 +210,7 @@ while rodando:
                     # Reseta o Jogo
                     fim_de_jogo = False
                     velocidade = 2
-                    ponto = 0
+                    pontos = 0
                     grupo_carros.empty()
                     jogador.rect.center = [jogador_x, jogador_y]
                 elif evento.key == K_n:
