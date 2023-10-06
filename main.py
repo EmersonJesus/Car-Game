@@ -23,6 +23,7 @@ amarelo = (255, 232, 0)
 fim_de_jogo = False
 velocidade = 2
 pontos = 0
+recorde = recorde_velho = 0
 
 # Marcadores de Tamanho --------------------------------
 marcador_largura = 10
@@ -47,7 +48,7 @@ class Carro(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         
         # Reduzindo a imagem para caber na pista -------
-        imagem_escala = 45 / imagem.get_rect().width
+        imagem_escala = 70 / imagem.get_rect().width
         nova_largura = imagem.get_rect().width * imagem_escala
         nova_altura = imagem.get_rect().height * imagem_escala
         self.image = pygame.transform.scale(imagem, (nova_largura, nova_altura))
@@ -83,10 +84,28 @@ grupo_carros = pygame.sprite.Group()
 batida = pygame.image.load('imagens/explosion.png')
 batida_rect = batida.get_rect()
 
+# Função Recorde
+def exibir_recorde(recorde, velho):
+    fonte = pygame.font.Font(pygame.font.get_default_font(), 16)
+    if recorde > velho:
+        texto = fonte.render('Novo Recorde: ' + str(recorde), True, branco)
+    else:
+        texto = fonte.render('Recorde: ' + str(velho), True, branco)
+    texto_rect = texto.get_rect()
+    texto_rect.center = (largura / 2, 130)  # Posição na tela para exibir o recorde
+    tela_jogo.blit(texto, texto_rect)
+
 # Loop do Jogo -----------------------------------------
 relogio = pygame.time.Clock()
 fps = 120
 rodando = True
+# Carregar o recorde no início do jogo ------------------
+try:
+   with open('recorde.txt', 'r') as arquivo:
+        recorde_velho = int(arquivo.read())
+except FileNotFoundError:
+    recorde = 0
+
 while rodando:
     relogio.tick(fps)
     
@@ -163,6 +182,11 @@ while rodando:
             
             # Adiciona Pontuação -------------------------
             pontos += 1
+            if pontos > recorde_velho:
+                recorde = pontos
+                # Salvar o recorde --------------------------------------
+                with open('recorde.txt', 'w') as arquivo:
+                    arquivo.write(str(recorde))
             
             # Aumenta Velocidade do Jogo a cada 5 carros --
             if pontos > 0 and pontos % 5 == 0:
@@ -192,6 +216,7 @@ while rodando:
         texto_rect = texto.get_rect()
         texto_rect.center = (largura / 2, 100)
         tela_jogo.blit(texto, texto_rect)
+        exibir_recorde(recorde, recorde_velho)
 
     pygame.display.update()
     
@@ -210,7 +235,13 @@ while rodando:
                     # Reseta o Jogo
                     fim_de_jogo = False
                     velocidade = 2
-                    pontos = 0
+                    pontos = recorde = 0
+                    # Carregar o recorde no recomeço do jogo ------------------
+                    try:
+                        with open('recorde.txt', 'r') as arquivo:
+                                recorde_velho = int(arquivo.read())
+                    except FileNotFoundError:
+                            recorde = 0
                     grupo_carros.empty()
                     jogador.rect.center = [jogador_x, jogador_y]
                 elif evento.key == K_n:
