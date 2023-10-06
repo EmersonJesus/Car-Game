@@ -79,6 +79,10 @@ for nome in nomes_imagens:
 # Grupo de Sprites para os Carros ----------------------
 grupo_carros = pygame.sprite.Group()
 
+# Carregar imagem da explosão --------------------------
+batida = pygame.image.load('imagens/explosion.png')
+batida_rect = batida.get_rect()
+
 # Loop do Jogo -----------------------------------------
 relogio = pygame.time.Clock()
 fps = 120
@@ -96,7 +100,20 @@ while rodando:
                 jogador.rect.x -= 100
             elif evento.key == K_RIGHT and jogador.rect.center[0] < pista_direita:
                 jogador.rect.x += 100
-        
+                
+            # Confere se há uma colisão lateral após mudar de pista
+            for carro in grupo_carros:
+                if pygame.sprite.collide_rect(jogador, carro):
+                    fim_de_jogo = True
+                    
+                    # Mostra imagem da explosão
+                    if evento.key == K_LEFT:
+                        jogador.rect.left = carro.rect.right
+                        batida_rect.center = [jogador.rect.left, (jogador.rect.center[1] + carro.rect.center[1]) / 2]
+                    elif evento.key == K_RIGHT:
+                        jogador.rect.right = carro.rect.left
+                        batida_rect.center = [jogador.rect.right, (jogador.rect.center[1] + carro.rect.center[1]) / 2]
+
         
     # Desenhando a grama -------------------------------
     tela_jogo.fill(verde)    
@@ -149,14 +166,56 @@ while rodando:
             
             # Aumenta Velocidade do Jogo a cada 5 carros --
             if pontos > 0 and pontos % 5 == 0:
-                velocidade += 1
+                velocidade += 0.5
         
     # Desenha os Carros do topo ---------------------------
     grupo_carros.draw(tela_jogo)
     
     # Mostrar Pontos --------------------------------------
-        
+    fonte = pygame.font.Font(pygame.font.get_default_font(), 16)
+    texto = fonte.render('Pontos: ' + str(pontos), True, branco)
+    texto_rect = texto.get_rect()
+    texto_rect.center = (50, 450)
+    tela_jogo.blit(texto, texto_rect)
             
+    # Checa se houve colisão ------------------------------
+    if pygame.sprite.spritecollide(jogador, grupo_carros, True):
+        fim_de_jogo = True
+        batida_rect.center = [jogador.rect.center[0], jogador.rect.top]
+        
+    # Mostra tela de fim de jogo ----------------------------
+    if fim_de_jogo:
+        tela_jogo.blit(batida, batida_rect)
+        pygame.draw.rect(tela_jogo, vermelho, (0, 50, largura, 100))
+        fonte = pygame.font.Font(pygame.font.get_default_font(), 16)
+        texto = fonte.render('Fim de Jogo. Quer jogar de novo? (Aperte S ou N)', True, branco)
+        texto_rect = texto.get_rect()
+        texto_rect.center = (largura / 2, 100)
+        tela_jogo.blit(texto, texto_rect)
+
     pygame.display.update()
+    
+    # Checa se jogador quer jogar de novo ----------------------
+    while fim_de_jogo:
+        relogio.tick(fps)
+        
+        for evento in pygame.event.get():
+            if evento.type == QUIT:
+                fim_de_jogo = False
+                rodando = False
+            
+            # Vê se o jogador apertou S ou N
+            if evento.type == KEYDOWN:
+                if evento.key == K_s:
+                    # Reseta o Jogo
+                    fim_de_jogo = False
+                    velocidade = 2
+                    ponto = 0
+                    grupo_carros.empty()
+                    jogador.rect.center = [jogador_x, jogador_y]
+                elif evento.key == K_n:
+                    # Sai do Loop
+                    fim_de_jogo = False
+                    rodando = False
 
 pygame.quit()
