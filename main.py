@@ -70,7 +70,14 @@ jogador = CarroJogador(jogador_x, jogador_y)
 grupo_jogador.add(jogador)
 
 # Carregando Outros Carros -----------------------------
-nomes_imagens = ['Mini_truck.png', 'Mini_van.png', 'taxi.png']
+nomes_imagens = ['Mini_truck.png', 'Mini_van.png', 'taxi.png', 'truck.png']
+imagem_carros = []
+for nome in nomes_imagens:
+    imagem = pygame.image.load("imagens/" + nome)
+    imagem_carros.append(imagem)
+    
+# Grupo de Sprites para os Carros ----------------------
+grupo_carros = pygame.sprite.Group()
 
 # Loop do Jogo -----------------------------------------
 relogio = pygame.time.Clock()
@@ -113,6 +120,43 @@ while rodando:
     # Desenhando o Carro do Jogador --------------------
     grupo_jogador.draw(tela_jogo)    
     
+    # Adicionar no topo dois carros ----------------------
+    if len(grupo_carros) < 2:
+        # Garantir que tenha espaço entre os carros ------
+        adiciona_carro = True
+        for carro in grupo_carros:
+            if carro.rect.top < carro.rect.height * 1.5:
+                adiciona_carro = False
+        
+        if adiciona_carro:
+            # Seleciona pista Aleatoria ------------------
+            pista = random.choice(pistas)
+            # Seleciona a imagem do carro aleatoria ------
+            img = random.choice(imagem_carros)
+            inimigo = Carro(img, pista, altura / -2)
+            grupo_carros.add(inimigo)
+            
+    # Faz o movimento dos carros -------------------------
+    for carro in grupo_carros:
+        carro.rect.y += velocidade
+        
+        # Remove o carro quando sai da tela --------------
+        if carro.rect.top >= altura:
+            carro.kill()
+            
+            # Adiciona Pontuação -------------------------
+            pontos += 1
+            
+            # Aumenta Velocidade do Jogo a cada 5 carros --
+            if pontos > 0 and pontos % 5 == 0:
+                velocidade += 1
+        
+    # Desenha os Carros do topo ---------------------------
+    grupo_carros.draw(tela_jogo)
+    
+    # Mostrar Pontos --------------------------------------
+        
+            
     pygame.display.update()
 
 pygame.quit()
