@@ -57,8 +57,20 @@ class Carro(pygame.sprite.Sprite):
 
 class CarroJogador(Carro):
     def __init__(self, x, y):
-        pass
-    
+        imagem = pygame.image.load('imagens/Audi.png')
+        super().__init__(imagem=imagem, x=x, y=y)
+
+# Coordenadas Inicial do Jogador -----------------------
+jogador_x = 250
+jogador_y = 400
+
+# Criando Carro do Jogador -----------------------------
+grupo_jogador = pygame.sprite.Group()
+jogador = CarroJogador(jogador_x, jogador_y)
+grupo_jogador.add(jogador)
+
+# Carregando Outros Carros -----------------------------
+nomes_imagens = ['Mini_truck.png', 'Mini_van.png', 'taxi.png']
 
 # Loop do Jogo -----------------------------------------
 relogio = pygame.time.Clock()
@@ -70,6 +82,14 @@ while rodando:
     for evento in pygame.event.get():
         if evento.type == QUIT:
             rodando = False
+            
+        # Mover o Carro do jogador usando setas direita/esquerda
+        if evento.type == KEYDOWN:
+            if evento.key == K_LEFT and jogador.rect.center[0] > pista_esquerda:
+                jogador.rect.x -= 100
+            elif evento.key == K_RIGHT and jogador.rect.center[0] < pista_direita:
+                jogador.rect.x += 100
+        
         
     # Desenhando a grama -------------------------------
     tela_jogo.fill(verde)    
@@ -89,7 +109,9 @@ while rodando:
     for y in range(marcador_altura * -2, altura, marcador_altura * 2):
         pygame.draw.rect(tela_jogo, branco, (pista_esquerda + 45, y + marcador_pista_y, marcador_largura, marcador_altura))
         pygame.draw.rect(tela_jogo, branco, (pista_centro + 45, y + marcador_pista_y, marcador_largura, marcador_altura))
-        
+    
+    # Desenhando o Carro do Jogador --------------------
+    grupo_jogador.draw(tela_jogo)    
     
     pygame.display.update()
 
