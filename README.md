@@ -1,5 +1,5 @@
 # Car-Game
- Jogo de carro simples em Python 3 usando o modulo Pygame.
+ Jogo de carro simples em Python 3 usando o modulo Pygame, feito com a finalidade de praticar conceitos básicos de programação.
 
  # Para rodar o projeto:
 <ul>
